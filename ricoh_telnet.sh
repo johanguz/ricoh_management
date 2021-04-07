@@ -1,26 +1,25 @@
-#!/usr/bin/expect
+#!/bin/bash
 #Script to telnet to Ricoh Copiers and Change Settings using the expect command
+# this one sets the sntp server
+#csv in /tmp folder can contain copier credentials to be tee'd into script
 #Written by Johan Guzman 
 
 IFS=,
 
 while true
-	read a idx
+	read hostName user credential
 do
 	/usr/bin/tee /tmp/ricoh_sntp.sh << telnetScript
 	#!/usr/bin/expect
 	set timeout 20
-	set hostName $a
-	set userName "admin"
-	set password ""
 	
-	spawn telnet $a
+	spawn telnet $hostName
 	
 	expect "RICOH Maintenance Shell."
 	expect "login:"
-	send "admin\r"
+	send "${user}\r"
 	expect "Password:"
-	send "\r";
+	send "${credential}\r"
 	send "sntp server \"time.apple.com\"\r"
 	send "logout\r"
 	expect "Do you save configuration data? (yes/no/return)"
@@ -28,5 +27,5 @@ do
 telnetScript
 	chmod 755 /tmp/ricoh_sntp.sh
 	/usr/bin/expect /tmp/ricoh_sntp.sh
-
+	
 done < /tmp/ricohIP.csv
